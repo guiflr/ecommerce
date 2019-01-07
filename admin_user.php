@@ -35,6 +35,18 @@ $app->post("/admin/users/create", function(){
 
 	$_POST["inadmin"] = (isset($_POST["inadmin"]))?1:0;
 
+	define('SECRET_IV', pack('a16','senha'));
+	define('SECRET', pack('a16','senha'));
+
+	$data = $_POST["despassword"];
+
+	$_POST["despassword"] = openssl_encrypt(
+	json_encode($data),
+	'AES-128-CBC',
+	SECRET,
+	0,
+	SECRET_IV
+	);
 	$user->setData($_POST);
 
 	$user->save();

@@ -23,7 +23,15 @@ Class User Extends Model{
 
 		$data = $res[0];
 
-		if($password === $data["despassword"]){
+		define('SECRET_IV', pack('a16','senha'));
+		define('SECRET', pack('a16','senha'));
+
+		$pass = $data["despassword"];
+		
+		$passTrue = json_decode(openssl_decrypt(
+			$pass, 'AES-128-CBC', SECRET, 0, SECRET_IV), true);
+		
+		if($password ===  $passTrue){
 			
 			$user = new User();
 
