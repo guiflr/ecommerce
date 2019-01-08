@@ -59,16 +59,15 @@ Class User Extends Model{
 
 		$data = $res[0];
 
-		/*define('SECRET_IV', pack('a16','senha'));
+		define('SECRET_IV', pack('a16','senha'));
 		define('SECRET', pack('a16','senha'));
 
 		$pass = $data["despassword"];
 		
 		$passTrue = json_decode(openssl_decrypt(
-			$pass, 'AES-128-CBC', SECRET, 0, SECRET_IV), true);*/
-		
-		var_dump($data["despassword"]);
-		if($password ===  $data["despassword"]){
+			$pass, 'AES-128-CBC', SECRET, 0, SECRET_IV), true);
+
+		if($password ===  $passTrue){
 			
 			$user = new User();
 
