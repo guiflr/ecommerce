@@ -10,6 +10,42 @@ Class User Extends Model{
 
 	const SESSION = "User";
 
+	public static function getFromSession(){
+
+		$user = new User();
+
+		if(isset($_SESSION[User::SESSION]) && (int)$_SESSION[User::SESSION]["iduser"] > 0){
+
+			$user->setData($_SESSION[User::SESSION]);
+
+		}else{
+			throw new \Exception("Error Processing Request");
+			
+		}
+
+		return $user;
+	}
+
+	public static function  checkLogin($inadmin = true){
+
+		if(!isset($_SESSION[User::SESSION]) || !$_SESSION[User::SESSION] 
+			|| !(int)$_SESSION[User::SESSION]["iduser"] > 0)		{
+			
+			return false;
+		}else{
+			if($inadmin === true && (bool)$_SESSION[User::SESSION]["inadmin"] === true){
+
+				return true;
+			}else if($inadmin === false){
+
+				return true;
+			}else{
+
+				return false;
+			}
+		}
+	}
+
 	public static function Login($login, $password){
 		$sql = new Sql();
 
@@ -23,15 +59,16 @@ Class User Extends Model{
 
 		$data = $res[0];
 
-		define('SECRET_IV', pack('a16','senha'));
+		/*define('SECRET_IV', pack('a16','senha'));
 		define('SECRET', pack('a16','senha'));
 
 		$pass = $data["despassword"];
 		
 		$passTrue = json_decode(openssl_decrypt(
-			$pass, 'AES-128-CBC', SECRET, 0, SECRET_IV), true);
+			$pass, 'AES-128-CBC', SECRET, 0, SECRET_IV), true);*/
 		
-		if($password ===  $passTrue){
+		var_dump($data["despassword"]);
+		if($password ===  $data["despassword"]){
 			
 			$user = new User();
 
@@ -49,9 +86,8 @@ Class User Extends Model{
 
 	public static function verifyLogin($inadmin = true){
 
-		if(!isset($_SESSION[User::SESSION]) || !$_SESSION[User::SESSION] 
-			|| !(int)$_SESSION[User::SESSION]["iduser"] || (bool)$_SESSION[User::SESSION] !== $inadmin)
-		{
+		if(!User::checkLogin($inadmin)){
+
 			header("Location: /admin/login");
 			exit;
 		}

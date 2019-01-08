@@ -4,6 +4,7 @@ use \Hcode\Page;
 use \Hcode\Model\User;
 use \Hcode\Model\Product;
 use \Hcode\Model\Category;
+use \Hcode\Model\Cart;
 use \Hcode\Tpl;
 
 
@@ -51,6 +52,27 @@ $app->get("/categories/:idcategory", function($idcategory){
 	]);
 });
 
+$app->get("/products/:desurl", function($desurl){
+
+	$product = new Product();
+
+	$product->getFromDesURL($desurl);
+
+	$page = new Page();
+	$page->setTpl("product-detail", [
+		"product"=>$product->getData(),
+		"categories"=>$product->getCategories()
+	]);
+});
+
+$app->get("/cart", function(){
+
+	$cart = Cart::getFromSession();
+
+	$page = new Page();
+
+	$page->setTpl("cart");
+});
 
 
 ?>
