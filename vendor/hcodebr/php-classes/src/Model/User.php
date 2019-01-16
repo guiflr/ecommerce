@@ -9,6 +9,8 @@ use Hcode\Mailer;
 Class User Extends Model{
 
 	const SESSION = "User";
+	const ERROR = "UserError";
+	const ERROR_REGISTER = "UserErrorRegister";
 
 	public static function getFromSession(){
 
@@ -18,6 +20,7 @@ Class User Extends Model{
 
 			$user->setData($_SESSION[User::SESSION]);
 
+
 		}else{
 			throw new \Exception("Error Processing Request");
 			
@@ -26,7 +29,7 @@ Class User Extends Model{
 		return $user;
 	}
 
-	public static function  checkLogin($inadmin = true){
+	public static function checkLogin($inadmin = true){
 
 		if(!isset($_SESSION[User::SESSION]) || !$_SESSION[User::SESSION] 
 			|| !(int)$_SESSION[User::SESSION]["iduser"] > 0)		{
@@ -47,9 +50,10 @@ Class User Extends Model{
 	}
 
 	public static function Login($login, $password){
+		
 		$sql = new Sql();
 
-		$res = $sql->select("SELECT * FROM tb_users WHERE deslogin = :LOGIN", array(
+		$res = $sql->select("SELECT * FROM tb_users a INNER JOIN tb_persons b ON a.idperson = b.idperson WHERE a.deslogin = :LOGIN", array(
 			":LOGIN"=>$login
 		));
 
@@ -58,7 +62,7 @@ Class User Extends Model{
 		}
 
 		$data = $res[0];
-
+		
 		define('SECRET_IV', pack('a16','senha'));
 		define('SECRET', pack('a16','senha'));
 
@@ -87,8 +91,13 @@ Class User Extends Model{
 
 		if(!User::checkLogin($inadmin)){
 
-			header("Location: /admin/login");
-			exit;
+			if($inadmin){
+				header("Location: /admin/login");
+				exit;
+			}else{
+				header("Location: /login");
+				exit;
+			}
 		}
 	}
 
@@ -107,11 +116,22 @@ Class User Extends Model{
 
 		$sql = new Sql();
 
+		define('SECRET_IV', pack('a16','senha'));
+		define('SECRET', pack('a16','senha'));
+
+		$pass =  openssl_encrypt(
+			json_encode($this->getdespassword()),
+			'AES-128-CBC',
+			SECRET,
+			0,
+			SECRET_IV
+		);
+
 		$results = $sql->select("CALL sp_users_save(:desperson, :deslogin, :despassword, :desemail, :nrphone, :inadmin)",
 			array(
 				":desperson"=>$this->getdesperson(),
 				":deslogin"=>$this->getdeslogin(),
-				":despassword"=>$this->getdespassword(),
+				":despassword"=>$pass,
 				":desemail"=>$this->getdesemail(),
 				":nrphone"=>$this->getnrphone(),
 				":inadmin"=>$this->getinadmin()
@@ -130,6 +150,7 @@ Class User Extends Model{
 		));
 
 		$this->setData($results[0]);
+
 	}
 
 	public function update(){
@@ -258,7 +279,56 @@ Class User Extends Model{
 			":iduser"=>$this->getiduser()
 		));
 
-	}	
+	}
+
+	public static function setMsgError($msg){
+
+		$_SESSION[User::ERROR] = $msg;
+	}
+
+	public static function getMsgError(){
+
+		$msg =  (isset($_SESSION[User::ERROR]) && $_SESSION[User::ERROR])?$_SESSION[User::ERROR]:"";
+		
+		User::clearMsgError();
+
+		return $msg;
+	}
+
+	public static function clearMsgError(){
+
+		$_SESSION[User::ERROR] = NULL;
+	}
+
+	public static function setRegisterError($msg){
+
+		$_SESSION[User::ERROR_REGISTER] = $msg;
+	}
+
+	public static function getRegisterError(){
+
+		$msg =  (isset($_SESSION[User::ERROR_REGISTER]) && $_SESSION[User::ERROR_REGISTER])?$_SESSION[User::ERROR_REGISTER]:"";
+		
+		User::clearRegisterError();
+
+		return $msg;
+	}
+
+	public static function clearRegisterError(){
+
+		$_SESSION[User::ERROR_REGISTER] = NULL;
+	}
+
+	public static function emailExists($email){
+
+		$sql = new Sql();
+
+		$res = $sql->select("SELECT * FROM tb_persons WHERE desemail = :desemail",[
+			":desemail"=>$email
+		]);
+
+		return (count($res)>0);
+	}
 }
 
 ?>

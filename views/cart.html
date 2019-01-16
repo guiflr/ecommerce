@@ -17,8 +17,8 @@
             
             <div class="col-md-12">
                 <div class="product-content-right">
+                    {if="$products!=NULL"}
                     <div class="woocommerce">
-
                         <form action="/checkout">
                             {if="$error != ''"}
                             <div class="alert alert-danger" role="alert">
@@ -37,6 +37,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
+                                    
                                     {loop="$products"}
                                     <tr class="cart_item">
                                         <td class="product-remove">
@@ -79,7 +80,9 @@
                                     
                                     <div class="coupon">
                                         <label for="cep">CEP:</label>
-                                        <input type="text" placeholder="00000-000" value="{$cart.deszipcode}" id="cep" class="input-text" name="zipcode">
+                                        {if="$cart.deszipcode != ''"}
+                                        <input type="text" placeholder="00000-000"  value="{$cart.deszipcode}" id="cep" class="input-text" name="zipcode">
+                                        {/if}
                                         <input type="submit" formmethod="post" formaction="/cart/freight" value="CÁLCULAR" class="button">
                                     </div>
 
@@ -110,11 +113,10 @@
                                 </div>
 
                             </div>
-
                             <div class="pull-right">
                                 <input type="submit" value="Finalizar Compra" name="proceed" class="checkout-button button alt wc-forward">
                             </div>
-
+                            {/if}
                         </form>
 
                     </div>                        

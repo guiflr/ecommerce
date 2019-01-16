@@ -17,8 +17,9 @@
             
             <div class="col-md-12">
                 <div class="product-content-right">
-                    <div class="woocommerce">
+                    <?php if( $products!=NULL ){ ?>
 
+                    <div class="woocommerce">
                         <form action="/checkout">
                             <?php if( $error != '' ){ ?>
 
@@ -40,6 +41,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
+                                    
                                     <?php $counter1=-1;  if( isset($products) && ( is_array($products) || $products instanceof Traversable ) && sizeof($products) ) foreach( $products as $key1 => $value1 ){ $counter1++; ?>
 
                                     <tr class="cart_item">
@@ -84,7 +86,11 @@
                                     
                                     <div class="coupon">
                                         <label for="cep">CEP:</label>
-                                        <input type="text" placeholder="00000-000" value="<?php echo htmlspecialchars( $cart["deszipcode"], ENT_COMPAT, 'UTF-8', FALSE ); ?>" id="cep" class="input-text" name="zipcode">
+                                        <?php if( $cart["deszipcode"] != '' ){ ?>
+
+                                        <input type="text" placeholder="00000-000"  value="<?php echo htmlspecialchars( $cart["deszipcode"], ENT_COMPAT, 'UTF-8', FALSE ); ?>" id="cep" class="input-text" name="zipcode">
+                                        <?php } ?>
+
                                         <input type="submit" formmethod="post" formaction="/cart/freight" value="CÁLCULAR" class="button">
                                     </div>
 
@@ -115,10 +121,10 @@
                                 </div>
 
                             </div>
-
                             <div class="pull-right">
                                 <input type="submit" value="Finalizar Compra" name="proceed" class="checkout-button button alt wc-forward">
                             </div>
+                            <?php } ?>
 
                         </form>
 

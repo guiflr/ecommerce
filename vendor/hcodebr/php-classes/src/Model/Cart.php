@@ -123,9 +123,8 @@ Class Cart Extends Model{
 				":idcart"=>$this->getidcart(),
 				":idproduct"=>$product->getidproduct()
 			]);
+			$this->getCalculateTotal();
 		}
-
-		$this->getCalculateTotal();
 		
 	}
 
