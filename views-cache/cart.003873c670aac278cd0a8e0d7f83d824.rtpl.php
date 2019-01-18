@@ -124,6 +124,9 @@
                             <div class="pull-right">
                                 <input type="submit" value="Finalizar Compra" name="proceed" class="checkout-button button alt wc-forward">
                             </div>
+                            <?php }else{ ?>
+
+                            <h1 style="text-align: center;">Carrinho vazio</h1>
                             <?php } ?>
 
                         </form>

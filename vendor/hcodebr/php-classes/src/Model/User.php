@@ -11,6 +11,9 @@ Class User Extends Model{
 	const SESSION = "User";
 	const ERROR = "UserError";
 	const ERROR_REGISTER = "UserErrorRegister";
+	const SECRET = 'senha';
+	const SECRET_IV = '5678910111213441';
+
 
 	public static function getFromSession(){
 
@@ -62,16 +65,12 @@ Class User Extends Model{
 		}
 
 		$data = $res[0];
-		
-		define('SECRET_IV', pack('a16','senha'));
-		define('SECRET', pack('a16','senha'));
 
 		$pass = $data["despassword"];
-		
-		$passTrue = json_decode(openssl_decrypt(
-			$pass, 'AES-128-CBC', SECRET, 0, SECRET_IV), true);
 
-		if($password ===  $passTrue){
+		//$passTrue = User::decrypt($pass);
+
+		if($password ===  $pass){
 			
 			$user = new User();
 
@@ -116,22 +115,13 @@ Class User Extends Model{
 
 		$sql = new Sql();
 
-		define('SECRET_IV', pack('a16','senha'));
-		define('SECRET', pack('a16','senha'));
-
-		$pass =  openssl_encrypt(
-			json_encode($this->getdespassword()),
-			'AES-128-CBC',
-			SECRET,
-			0,
-			SECRET_IV
-		);
+		//$pass = User::crypt($this->getdespassword());
 
 		$results = $sql->select("CALL sp_users_save(:desperson, :deslogin, :despassword, :desemail, :nrphone, :inadmin)",
 			array(
 				":desperson"=>$this->getdesperson(),
 				":deslogin"=>$this->getdeslogin(),
-				":despassword"=>$pass,
+				":despassword"=>$this->getdespassword(),
 				":desemail"=>$this->getdesemail(),
 				":nrphone"=>$this->getnrphone(),
 				":inadmin"=>$this->getinadmin()
@@ -180,7 +170,7 @@ Class User Extends Model{
 		));
 	}
 
-	public static function getForgot($email){
+	public static function getForgot($email, $inadmin = true){
 
 		$sql = new Sql();
 
@@ -212,8 +202,15 @@ Class User Extends Model{
 
 				$code = $dataRecovery["idrecovery"];
 
+				//$cod = User::crypt($code);
 
-				$link = "http://dev.com/admin/forgot/reset?code=$code";
+				if($inadmin === true){
+
+					$link = "http://dev.com/admin/forgot/reset?code=$code";
+				}else{
+
+					$link = "http://dev.com/forgot/reset?code=$code";
+				}
 
 				$mailer = new Mailer($data["desemail"], $data["desperson"], "Redefinir a senha do E-commerce", "forgot", array(
 					"name"=>$data["desperson"],
@@ -223,14 +220,13 @@ Class User Extends Model{
 				$mailer->send();
 
 				return $data;
-
-
 			}
 		}
 	}
 
-	public function validForgotDecrypt($code){
-		$idrecovery = $code;
+	public function validForgotDecrypt($idrecovery){
+
+		//$idrecovery = User::decrypt($code);
 
 		$sql = new Sql();
 
@@ -263,6 +259,7 @@ Class User Extends Model{
 
 		$sql = new Sql();
 
+
 		$sql->query("UPDATE tb_userspasswordsrecoveries SET dtrecovery = NOW() WHERE idrecovery = :idrecovery", array(
 
 				":idrecovery"=>$idrecovery
@@ -272,6 +269,8 @@ Class User Extends Model{
 	public function setPassword($password){
 
 		$sql = new Sql();
+
+		//$pass = User::crypt($password);
 
 		$sql->query("UPDATE tb_users SET despassword = :despassword WHERE iduser = :iduser", array(
 
@@ -329,6 +328,28 @@ Class User Extends Model{
 
 		return (count($res)>0);
 	}
+
+	/*public static function crypt($cod){
+
+		$pass =  openssl_encrypt(
+			json_encode($cod),
+			'AES-128-CBC',
+			User::SECRET,
+			0,
+			User::SECRET_IV
+		);
+
+		return $pass;
+	}
+
+	public static function decrypt($cod){
+		
+		$passTrue = json_decode(openssl_decrypt(
+			$cod, 'AES-128-CBC', User::SECRET, 0, User::SECRET_IV), true);
+
+		return $passTrue;
+
+	}*/
 }
 
 ?>
