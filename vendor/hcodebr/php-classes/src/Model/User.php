@@ -13,6 +13,7 @@ Class User Extends Model{
 	const ERROR_REGISTER = "UserErrorRegister";
 	const SECRET = 'senha';
 	const SECRET_IV = '5678910111213441';
+	const SUCCESS = 'UserSuccess';
 
 
 	public static function getFromSession(){
@@ -329,27 +330,24 @@ Class User Extends Model{
 		return (count($res)>0);
 	}
 
-	/*public static function crypt($cod){
+	public static function setMsgSuccess($msg){
 
-		$pass =  openssl_encrypt(
-			json_encode($cod),
-			'AES-128-CBC',
-			User::SECRET,
-			0,
-			User::SECRET_IV
-		);
-
-		return $pass;
+		$_SESSION[User::SUCCESS] = $msg;
 	}
 
-	public static function decrypt($cod){
+	public static function getMsgSuccess(){
+
+		$msg =  (isset($_SESSION[User::SUCCESS]) && $_SESSION[User::SUCCESS])?$_SESSION[User::SUCCESS]:"";
 		
-		$passTrue = json_decode(openssl_decrypt(
-			$cod, 'AES-128-CBC', User::SECRET, 0, User::SECRET_IV), true);
+		User::clearMsgSuccess();
 
-		return $passTrue;
+		return $msg;
+	}
 
-	}*/
+	public static function clearMsgSuccess(){
+
+		$_SESSION[User::SUCCESS] = NULL;
+	}
 }
 
 ?>
