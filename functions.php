@@ -3,7 +3,7 @@
 use \Hcode\Model\User;
 use \Hcode\Model\Cart;
 
-function formatPrice(float $vlprice){
+function formatPrice($vlprice){
 
 	return number_format($vlprice, 2, ",", ".");
 }

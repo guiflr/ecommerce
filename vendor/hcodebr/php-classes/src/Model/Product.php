@@ -146,6 +146,54 @@ Class Product Extends Model{
 		]);
 	}
 
+	public function getPage($page = 1,$itemsPerPage=1){
+
+		$start = ($page - 1) * $itemsPerPage;
+
+		$sql = new Sql();
+
+		$res = $sql->select("
+
+			SELECT SQL_CALC_FOUND_ROWS *
+			FROM tb_products
+			ORDER BY desproduct
+			LIMIT $start, $itemsPerPage;
+		");
+
+		$resTotal = $sql->select("SELECT FOUND_ROWS() AS nrtotal");
+
+		return [
+			"data"=>$res,
+			"total"=>(int)$resTotal[0]["nrtotal"],
+			"pages"=>ceil($resTotal[0]["nrtotal"] / $itemsPerPage)
+		];
+	}
+
+	public function getPageSearch($search,$page=1,$itemsPerPage=1){
+
+		$start = ($page - 1) * $itemsPerPage;
+
+		$sql = new Sql();
+
+		$res = $sql->select("
+
+			SELECT SQL_CALC_FOUND_ROWS *
+			FROM tb_products
+			WHERE desproduct LIKE :search
+			ORDER BY desproduct
+			LIMIT $start, $itemsPerPage;
+		",[
+			":search"=>"%".$search."%"
+		]);
+
+		$resTotal = $sql->select("SELECT FOUND_ROWS() AS nrtotal");
+
+		return [
+			"data"=>$res,
+			"total"=>(int)$resTotal[0]["nrtotal"],
+			"pages"=>ceil($resTotal[0]["nrtotal"] / $itemsPerPage)
+		];
+	}
 }
 
 ?>

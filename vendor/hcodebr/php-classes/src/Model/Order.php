@@ -121,6 +121,66 @@ class Order extends Model{
 
 		$_SESSION[Order::ERROR] = NULL;
 	}
+
+	public function getPage($page = 1,$itemsPerPage=1){
+
+		$start = ($page - 1) * $itemsPerPage;
+
+		$sql = new Sql();
+
+		$res = $sql->select("
+
+			SELECT SQL_CALC_FOUND_ROWS *
+			FROM tb_orders a
+			INNER JOIN tb_ordersstatus b USING(idstatus)
+			INNER JOIN tb_carts c USING(idcart)
+			INNER JOIN tb_users d ON d.iduser = a.iduser
+			INNER JOIN tb_addresses e USING(idaddress)
+			INNER JOIN tb_persons f ON f.idperson = d.idperson
+			ORDER BY a.dtregister DESC
+			LIMIT $start, $itemsPerPage;
+		");
+
+		$resTotal = $sql->select("SELECT FOUND_ROWS() AS nrtotal");
+
+		return [
+			"data"=>$res,
+			"total"=>(int)$resTotal[0]["nrtotal"],
+			"pages"=>ceil($resTotal[0]["nrtotal"] / $itemsPerPage)
+		];
+	}
+
+	public function getPageSearch($search,$page=1,$itemsPerPage=1){
+
+		$start = ($page - 1) * $itemsPerPage;
+
+		$sql = new Sql();
+
+		$res = $sql->select("
+
+			SELECT SQL_CALC_FOUND_ROWS *
+			FROM tb_orders a
+			INNER JOIN tb_ordersstatus b USING(idstatus)
+			INNER JOIN tb_carts c USING(idcart)
+			INNER JOIN tb_users d ON d.iduser = a.iduser
+			INNER JOIN tb_addresses e USING(idaddress)
+			INNER JOIN tb_persons f ON f.idperson = d.idperson
+			WHERE a.idorder = :id OR f.desperson LIKE :search
+			ORDER BY a.dtregister DESC
+			LIMIT $start, $itemsPerPage;
+		",[
+			":search"=>"%".$search."%",
+			":id"=>$search
+		]);
+
+		$resTotal = $sql->select("SELECT FOUND_ROWS() AS nrtotal");
+
+		return [
+			"data"=>$res,
+			"total"=>(int)$resTotal[0]["nrtotal"],
+			"pages"=>ceil($resTotal[0]["nrtotal"] / $itemsPerPage)
+		];
+	}
 }
 
 
